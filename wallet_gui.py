@@ -4,7 +4,7 @@ from tkinter import messagebox
 
 from tkcalendar import DateEntry  # календарь для гуи
 
-from func import add_transaction, show_transaction, del_transaction
+from func import add_transaction, show_transaction, del_transaction, get_total_amount
 
 
 # Создаем класс кошелька
@@ -41,6 +41,9 @@ class Wallet:
         self.del_btn = ttk.Button(self.root, text="Удалить", command=self.del_transaction)
         self.del_btn.grid(row=3, column=2)
 
+        self.sum_btn = ttk.Button(self.root, text="Общая сумма", command=self.summa_transaction)
+        self.sum_btn.grid(row=5, column=2)
+
         # таблица Treeview
         self.transaction_list = ttk.Treeview(self.root, columns=("id", "Сумма", "Описание", "Дата"), show='headings')
         self.transaction_list.heading("id", text="ID")
@@ -50,6 +53,16 @@ class Wallet:
 
         self.transaction_list.column("id", width=30)
         self.transaction_list.column("Сумма", width=100)
+        self.transaction_list.column("Описание", width=280, stretch=True, anchor='w')
+        self.transaction_list.column("Дата", width=100)
+
+        # Создание вертикального скроллбара
+        y_scrollbar = ttk.Scrollbar(self.root, orient="vertical", command=self.transaction_list.yview)
+        y_scrollbar.grid(row=4, column=3, sticky="ns")
+
+
+        # Привязка скроллбаров к Treeview
+        self.transaction_list.configure(yscrollcommand=y_scrollbar.set)
 
         self.transaction_list.grid(row=4, column=0, padx=10, columnspan=3)
 
@@ -59,9 +72,17 @@ class Wallet:
         description = self.description_entry.get()
         amount = self.amount_entry.get()
         if amount and description:
-            amount = float(amount)
-            add_transaction(date, description, amount)
-            self.update_transaction_list()
+            try:
+                amount = float(amount)
+                add_transaction(date, description, amount)
+                self.update_transaction_list()
+
+                # очистка полей Описание и Сумма
+                self.description_entry.delete(0, tk.END)
+                self.amount_entry.delete(0, tk.END)
+                messagebox.showinfo("Удача", f"Транзакция '{description}' добавлена")
+            except ValueError:
+                messagebox.showerror("error", "Поле 'Сумма' должно быть числом")
         else:
             messagebox.showwarning("error", "Введите значения в поля")
 
@@ -75,6 +96,10 @@ class Wallet:
         else:
             messagebox.showwarning("Предупреждение", "Выберите транзакцию для удаления")
 
+    def summa_transaction(self):
+        all_summa = get_total_amount()
+        messagebox.showinfo("Общая сумма за все траты", f'Общая сумма трат = {all_summa} руб')
+
     # обновление информации в бд
     def update_transaction_list(self):
         for i in self.transaction_list.get_children():
@@ -83,6 +108,7 @@ class Wallet:
         for transaction in show_transaction():
             self.transaction_list.insert('', 'end', values=transaction)
 
-root = tk.Tk()
-app = Wallet(root)
-root.mainloop()
+if __name__ == '__main__':
+    root = tk.Tk()
+    app = Wallet(root)
+    root.mainloop()

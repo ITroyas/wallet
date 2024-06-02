@@ -14,11 +14,24 @@ def add_transaction(date, description, amount):
                   """, (date, description, amount)
                   )
 
+def get_total_amount():
+    conn = sqlite3.connect('my_wallet.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+    SELECT SUM(amount) FROM my_wallet
+    ''')
+
+    total = cursor.fetchone()[0]
+    conn.close()
+
+    return total if total is not None else 0.0
+
 def del_transaction(transaction_id):
     connection_bd("my_wallet.db",
                   """
                   DELETE FROM my_wallet WHERE id = ?
-                  """, (transaction_id))
+                  """, (transaction_id,))
 
 def show_transaction():
     conn = sqlite3.connect("my_wallet.db")
