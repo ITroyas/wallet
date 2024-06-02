@@ -25,5 +25,6 @@
 3. Добавлен скролл
 4. Исправлены некоторые недочеты
 
+
 ![upd2](https://github.com/Troyas01/wallet/assets/97132641/531a4e5d-03fc-4a26-82ec-bede325f3d20)
 
