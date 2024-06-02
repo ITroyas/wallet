@@ -3,7 +3,7 @@
 """
 
 import sqlite3
-from main import connection_bd
+from one import connection_bd
 
 
 def add_transaction(date, description, amount):
